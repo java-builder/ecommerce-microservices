@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
         User user = userMapper.toUser(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.password()));
 
         Role role = roleService.createRole(RoleType.CUSTOMER.name());
         user.addRole(role);
