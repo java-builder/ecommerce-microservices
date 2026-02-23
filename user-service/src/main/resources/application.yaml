@@ -13,3 +13,6 @@ spring:
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret-key: O1oVhWC2yyN8DPgsAcRFel7I3EGE6O1kK3bzY8PgNXhXR1V4lU//KSrqSoa83EGCk6+o9DruNaZZWgy+yBGSww==
