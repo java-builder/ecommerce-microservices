@@ -1,9 +1,9 @@
 package com.javabuilder.userservice.service.impl;
 
 import com.javabuilder.userservice.common.RoleType;
-import com.javabuilder.userservice.common.UserStatus;
 import com.javabuilder.userservice.dto.request.CreateUserRequest;
 import com.javabuilder.userservice.dto.response.CreateUserResponse;
+import com.javabuilder.userservice.dto.response.UserDetailResponse;
 import com.javabuilder.userservice.entity.Role;
 import com.javabuilder.userservice.entity.User;
 import com.javabuilder.userservice.exception.ErrorCode;
@@ -42,6 +42,14 @@ public class UserServiceImpl implements UserService {
             throw new UserServiceException(ErrorCode.USER_ALREADY_EXISTS);
         }
         return userMapper.toCreateUserResponse(user);
+    }
+
+    @Override
+    public UserDetailResponse myInfo(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserServiceException(ErrorCode.USER_NOT_FOUND));
+
+        return userMapper.toUserDetailResponse(user);
     }
 
 }
