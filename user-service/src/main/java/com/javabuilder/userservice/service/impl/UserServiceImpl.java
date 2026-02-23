@@ -1,6 +1,7 @@
 package com.javabuilder.userservice.service.impl;
 
 import com.javabuilder.userservice.common.RoleType;
+import com.javabuilder.userservice.common.UserStatus;
 import com.javabuilder.userservice.dto.request.CreateUserRequest;
 import com.javabuilder.userservice.dto.response.CreateUserResponse;
 import com.javabuilder.userservice.entity.Role;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
         User user = userMapper.toUser(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.password()));
 
         Role role = roleService.createRole(RoleType.CUSTOMER.name());
         user.addRole(role);
