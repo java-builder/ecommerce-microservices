@@ -12,6 +12,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "User not found", HttpStatus.NOT_FOUND),
 
     TOKEN_GENERATION_FAILED(500, "Failed to generate JWT token", HttpStatus.INTERNAL_SERVER_ERROR),
+    TOKEN_EXPIRED(401, "JWT token has expired", HttpStatus.UNAUTHORIZED),
+    TOKEN_INVALID(401, "Invalid JWT token", HttpStatus.UNAUTHORIZED),
 
 
     ;

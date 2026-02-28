@@ -6,9 +6,13 @@ import com.javabuilder.userservice.exception.UserServiceException;
 import com.javabuilder.userservice.service.JwtService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -82,6 +86,21 @@ public class JwtServiceImpl implements JwtService {
             throw new UserServiceException(ErrorCode.TOKEN_GENERATION_FAILED);
         }
         return jwsObject.serialize();
+    }
+
+    @Override
+    public SignedJWT validateToken(String token) throws ParseException, JOSEException {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        if(expiration.before(new Date()))
+            throw new UserServiceException(ErrorCode.TOKEN_EXPIRED);
+
+        boolean verify = signedJWT.verify(new MACVerifier(secretKey));
+        if(!verify)
+            throw new UserServiceException(ErrorCode.TOKEN_INVALID);
+
+        return signedJWT;
     }
 
 }

@@ -5,8 +5,11 @@ import com.javabuilder.userservice.dto.response.LoginResponse;
 import com.javabuilder.userservice.entity.User;
 import com.javabuilder.userservice.exception.ErrorCode;
 import com.javabuilder.userservice.exception.UserServiceException;
+import com.javabuilder.userservice.repository.UserRepository;
 import com.javabuilder.userservice.service.AuthenticationService;
 import com.javabuilder.userservice.service.JwtService;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,8 +18,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -52,4 +58,31 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .roles(roles)
                 .build();
     }
+
+    @Override
+    public LoginResponse refreshToken(String refreshToken)  {
+        try {
+            SignedJWT signedJWT = jwtService.validateToken(refreshToken);
+            String userId = signedJWT.getJWTClaimsSet().getSubject();
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserServiceException(ErrorCode.USER_NOT_FOUND));
+
+            Set<String> roles = user.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
+
+            String newAccessToken = jwtService.generateAccessToken(userId, roles);
+
+            return LoginResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(refreshToken)
+                    .roles(roles)
+                    .build();
+
+        } catch (ParseException | JOSEException e) {
+            throw new UserServiceException(ErrorCode.TOKEN_INVALID);
+        }
+    }
+
 }
