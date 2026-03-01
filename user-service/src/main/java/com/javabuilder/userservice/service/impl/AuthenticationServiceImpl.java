@@ -85,4 +85,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    @Override
+    public void logout(String accessToken, String refreshToken) {
+
+    }
+
 }

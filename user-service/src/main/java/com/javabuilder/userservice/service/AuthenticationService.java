@@ -6,4 +6,5 @@ import com.javabuilder.userservice.dto.response.LoginResponse;
 public interface AuthenticationService {
     LoginResponse login(LoginRequest request);
     LoginResponse refreshToken(String refreshToken);
+    void logout(String accessToken, String refreshToken);
 }
