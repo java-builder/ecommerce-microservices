@@ -4,12 +4,15 @@ import com.javabuilder.userservice.dto.request.LoginRequest;
 import com.javabuilder.userservice.dto.response.ApiResponse;
 import com.javabuilder.userservice.dto.response.LoginResponse;
 import com.javabuilder.userservice.service.AuthenticationService;
+import com.nimbusds.jose.JOSEException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,6 +47,24 @@ public class AuthenticationController {
                 .code(HttpStatus.OK.value())
                 .message("Token refreshed successfully")
                 .data(data)
+                .build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@CookieValue("refresh_token") String refreshToken, HttpServletResponse response) throws ParseException, JOSEException {
+        authenticationService.logout(refreshToken);
+
+        Cookie cookie = new Cookie("refresh_token", "");
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+
+        return ApiResponse.<Void>builder()
+                .code(HttpStatus.OK.value())
+                .message("Logout successful")
                 .build();
     }
 

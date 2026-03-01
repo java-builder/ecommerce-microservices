@@ -1,6 +1,7 @@
 package com.javabuilder.userservice.service.impl;
 
 import com.javabuilder.userservice.common.TokenType;
+import com.javabuilder.userservice.dto.TokenDetails;
 import com.javabuilder.userservice.exception.ErrorCode;
 import com.javabuilder.userservice.exception.UserServiceException;
 import com.javabuilder.userservice.service.JwtService;
@@ -59,11 +60,13 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateRefreshToken(String userId) {
+    public TokenDetails generateRefreshToken(String userId) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         Date issueTime = new Date();
         Date expiredTime = new Date(Instant.now().plus(14, ChronoUnit.DAYS).toEpochMilli());
+        long ttlSeconds = ChronoUnit.SECONDS.between(Instant.now(), expiredTime.toInstant());
+
         String jwtId = UUID.randomUUID().toString();
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -85,7 +88,13 @@ public class JwtServiceImpl implements JwtService {
         } catch (JOSEException e) {
             throw new UserServiceException(ErrorCode.TOKEN_GENERATION_FAILED);
         }
-        return jwsObject.serialize();
+        String token = jwsObject.serialize();
+
+        return TokenDetails.builder()
+                .value(token)
+                .jwtId(jwtId)
+                .ttlSeconds(ttlSeconds)
+                .build();
     }
 
     @Override

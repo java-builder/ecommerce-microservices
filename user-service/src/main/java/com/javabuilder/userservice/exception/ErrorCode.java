@@ -15,6 +15,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED(401, "JWT token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID(401, "Invalid JWT token", HttpStatus.UNAUTHORIZED),
 
+    MISSING_LOGOUT_INFO(400, "Authorization header or refresh token is missing", HttpStatus.BAD_REQUEST),
 
     ;
 
