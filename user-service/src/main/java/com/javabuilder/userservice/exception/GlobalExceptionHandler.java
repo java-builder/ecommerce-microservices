@@ -3,6 +3,7 @@ package com.javabuilder.userservice.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,7 +26,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserServiceException.class)
-    public ResponseEntity<ErrorResponse> handlerFLearningException(UserServiceException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handlerUserServiceException(UserServiceException exception, WebRequest request) {
         ErrorResponse response = ErrorResponse.builder()
                 .code(exception.getErrorCode().getCode())
                 .error(exception.getErrorCode().getHttpStatus().getReasonPhrase())
@@ -57,6 +58,14 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handlerAuthorizationDeniedException(WebRequest request) {
+
+        ErrorResponse errorResponse = buildErrorCodeResponse(ErrorCode.FORBIDDEN, request);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     private ErrorResponse buildErrorCodeResponse(ErrorCode errorCode, WebRequest request) {
