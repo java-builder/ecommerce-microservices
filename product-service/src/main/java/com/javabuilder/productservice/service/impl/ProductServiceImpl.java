@@ -12,10 +12,16 @@ import com.javabuilder.productservice.repository.ProductRepository;
 import com.javabuilder.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    @PreAuthorize("hasAnyAuthority('SELLER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SELLER','ADMIN')")
     @Override
     public CreateProductResponse createProduct(String sellerId, CreateProductRequest request) {
         Category category = categoryRepository.findById(request.categoryId())
@@ -90,16 +96,28 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductServiceException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('SELLER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SELLER','ADMIN')")
     @Override
-    public void deleteProduct(String sellerId, String id) {
+    public void deleteProduct(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductServiceException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        if (!product.getSellerId().equals(sellerId)) {
-            throw new ProductServiceException(ErrorCode.PRODUCT_ACCESS_DENIED);
-        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null)
+            throw new ProductServiceException(ErrorCode.UNAUTHORIZED);
 
+        String userId = authentication.getName();
+
+        if (!product.getSellerId().equals(userId)) {
+
+            Set<String> authorities = authentication.getAuthorities()
+                    .stream().map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet());
+
+            if(!authorities.contains("ADMIN")) {
+                throw new ProductServiceException(ErrorCode.PRODUCT_ACCESS_DENIED);
+            }
+        }
         productRepository.delete(product);
         log.info("Product deleted successfully");
     }

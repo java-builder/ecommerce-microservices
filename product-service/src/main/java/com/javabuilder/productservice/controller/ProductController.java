@@ -52,9 +52,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<Void> deleteProductById(@AuthenticationPrincipal Jwt jwt, @PathVariable String id) {
-        var sellerId = jwt.getSubject();
-        productService.deleteProduct(sellerId, id);
+    ApiResponse<Void> deleteProductById(@PathVariable String id) {
+        productService.deleteProduct(id);
         return ApiResponse.<Void>builder()
                 .code(HttpStatus.NO_CONTENT.value())
                 .message("Product deleted successfully")

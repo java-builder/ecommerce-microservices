@@ -10,5 +10,5 @@ public interface ProductService {
     CreateProductResponse createProduct(String sellerId, CreateProductRequest request);
     List<ProductDetailResponse> getAllProducts();
     ProductDetailResponse getProductById(String id);
-    void deleteProduct(String sellerId, String id);
+    void deleteProduct(String id);
 }
