@@ -26,6 +26,9 @@ public class Category {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @OneToMany(mappedBy = "category")
     @Builder.Default
     private List<Product> products = new ArrayList<>();
