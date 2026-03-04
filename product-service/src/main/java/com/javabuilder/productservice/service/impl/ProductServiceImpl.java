@@ -1,13 +1,106 @@
 package com.javabuilder.productservice.service.impl;
 
+import com.javabuilder.productservice.dto.request.CreateProductRequest;
+import com.javabuilder.productservice.dto.response.CreateProductResponse;
+import com.javabuilder.productservice.dto.response.ProductDetailResponse;
+import com.javabuilder.productservice.entity.Category;
+import com.javabuilder.productservice.entity.Product;
+import com.javabuilder.productservice.exception.ErrorCode;
+import com.javabuilder.productservice.exception.ProductServiceException;
+import com.javabuilder.productservice.repository.CategoryRepository;
+import com.javabuilder.productservice.repository.ProductRepository;
 import com.javabuilder.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j(topic = "PRODUCT-SERVICE")
 public class ProductServiceImpl implements ProductService {
 
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+
+    @PreAuthorize("hasAnyAuthority('SELLER', 'ADMIN')")
+    @Override
+    public CreateProductResponse createProduct(String sellerId, CreateProductRequest request) {
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ProductServiceException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        Product product = Product.builder()
+                .sellerId(sellerId)
+                .name(request.name())
+                .description(request.description())
+                .price(request.price())
+                .quantity(request.quantity())
+                .images(request.images())
+                .status(request.status())
+                .category(category)
+                .build();
+
+        productRepository.save(product);
+        log.info("Product created successfully");
+
+        return CreateProductResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .quantity(product.getQuantity())
+                .images(product.getImages())
+                .status(product.getStatus())
+                .createdAt(product.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public List<ProductDetailResponse> getAllProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(product -> ProductDetailResponse.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .description(product.getDescription())
+                        .price(product.getPrice())
+                        .quantity(product.getQuantity())
+                        .images(product.getImages())
+                        .status(product.getStatus())
+                        .createdAt(product.getCreatedAt())
+                        .build())
+                .toList();
+    }
+
+    @Override
+    public ProductDetailResponse getProductById(String id) {
+        return productRepository.findById(id)
+                .map(product -> ProductDetailResponse.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .description(product.getDescription())
+                        .price(product.getPrice())
+                        .quantity(product.getQuantity())
+                        .images(product.getImages())
+                        .status(product.getStatus())
+                        .createdAt(product.getCreatedAt())
+                        .build())
+                .orElseThrow(() -> new ProductServiceException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @PreAuthorize("hasAnyAuthority('SELLER', 'ADMIN')")
+    @Override
+    public void deleteProduct(String sellerId, String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductServiceException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductServiceException(ErrorCode.PRODUCT_ACCESS_DENIED);
+        }
+
+        productRepository.delete(product);
+        log.info("Product deleted successfully");
+    }
 }
