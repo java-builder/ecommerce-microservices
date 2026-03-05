@@ -1,6 +1,7 @@
 package com.javabuilder.productservice.service.impl;
 
 import com.javabuilder.productservice.dto.request.CreateProductRequest;
+import com.javabuilder.productservice.dto.request.SearchRequest;
 import com.javabuilder.productservice.dto.response.CreateProductResponse;
 import com.javabuilder.productservice.dto.response.ProductDetailResponse;
 import com.javabuilder.productservice.entity.Category;
@@ -9,10 +10,11 @@ import com.javabuilder.productservice.exception.ErrorCode;
 import com.javabuilder.productservice.exception.ProductServiceException;
 import com.javabuilder.productservice.repository.CategoryRepository;
 import com.javabuilder.productservice.repository.ProductRepository;
+import com.javabuilder.productservice.repository.specification.ProductSpecification;
 import com.javabuilder.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -64,8 +66,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDetailResponse> getAllProducts() {
-        return productRepository.findAll()
+    public List<ProductDetailResponse> getAllProducts(SearchRequest request) {
+
+        Specification<Product> specification = Specification.allOf(
+                ProductSpecification.hasName(request.name()),
+                ProductSpecification.hasPrice(request.minPrice(), request.maxPrice()),
+                ProductSpecification.hasStatus(request.status()),
+                ProductSpecification.inStock(request.inStock()),
+                ProductSpecification.hasCategory(request.categoryId())
+        );
+
+        return productRepository.findAll(specification)
                 .stream()
                 .map(product -> ProductDetailResponse.builder()
                         .id(product.getId())

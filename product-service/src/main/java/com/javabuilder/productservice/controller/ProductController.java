@@ -1,6 +1,7 @@
 package com.javabuilder.productservice.controller;
 
 import com.javabuilder.productservice.dto.request.CreateProductRequest;
+import com.javabuilder.productservice.dto.request.SearchRequest;
 import com.javabuilder.productservice.dto.response.ApiResponse;
 import com.javabuilder.productservice.dto.response.CreateProductResponse;
 import com.javabuilder.productservice.dto.response.ProductDetailResponse;
@@ -32,8 +33,8 @@ public class ProductController {
     }
 
     @GetMapping
-    ApiResponse<List<ProductDetailResponse>> getProducts() {
-        var data = productService.getAllProducts();
+    ApiResponse<List<ProductDetailResponse>> getProducts(SearchRequest request) {
+        var data = productService.getAllProducts(request);
         return ApiResponse.<List<ProductDetailResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Products retrieved successfully")
