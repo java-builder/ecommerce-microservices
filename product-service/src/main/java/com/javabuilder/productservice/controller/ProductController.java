@@ -4,6 +4,7 @@ import com.javabuilder.productservice.dto.request.CreateProductRequest;
 import com.javabuilder.productservice.dto.request.SearchRequest;
 import com.javabuilder.productservice.dto.response.ApiResponse;
 import com.javabuilder.productservice.dto.response.CreateProductResponse;
+import com.javabuilder.productservice.dto.response.PageResponse;
 import com.javabuilder.productservice.dto.response.ProductDetailResponse;
 import com.javabuilder.productservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -12,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,9 +32,12 @@ public class ProductController {
     }
 
     @GetMapping
-    ApiResponse<List<ProductDetailResponse>> getProducts(SearchRequest request) {
-        var data = productService.getAllProducts(request);
-        return ApiResponse.<List<ProductDetailResponse>>builder()
+    ApiResponse<PageResponse<ProductDetailResponse>> getProducts(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            SearchRequest request) {
+        var data = productService.getAllProducts(page, size, request);
+        return ApiResponse.<PageResponse<ProductDetailResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Products retrieved successfully")
                 .data(data)
