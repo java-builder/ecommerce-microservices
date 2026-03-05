@@ -5,6 +5,11 @@ spring:
   application:
     name: search-service
 
+elasticsearch:
+  server-url: http://localhost:9200
+  api-key: dlhKbXZad0JnbzZORVJRc3NzdnE6Z0tCbXBvZ01JdmlCRkU2ZjA0V3YyZw==
+
+
 eureka:
   instance:
     hostname: localhost
