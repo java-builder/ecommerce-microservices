@@ -3,6 +3,7 @@ package com.javabuilder.searchservice.document;
 import lombok.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Getter
@@ -14,7 +15,7 @@ public class ProductDocument implements Serializable {
     private String id;
     private String name;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private String categoryId;
     private String categoryName;
     private String thumbnail;

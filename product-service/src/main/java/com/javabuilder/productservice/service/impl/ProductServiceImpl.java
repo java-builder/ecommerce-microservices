@@ -67,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
-                .price(product.getPrice().doubleValue())
+                .price(product.getPrice())
                 .categoryId(category.getId())
                 .categoryName(category.getName())
                 .thumbnail(product.getImages().stream().filter(ProductImage::getIsPrimary).map(ProductImage::getUrl).findFirst().orElse(""))
