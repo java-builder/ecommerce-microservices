@@ -1,5 +1,7 @@
 package com.javabuilder.productservice.service.impl;
 
+import com.javabuilder.event.ProductCreatedEvent;
+import com.javabuilder.event.ProductDeletedEvent;
 import com.javabuilder.productservice.dto.request.CreateProductRequest;
 import com.javabuilder.productservice.dto.request.SearchRequest;
 import com.javabuilder.productservice.dto.response.CreateProductResponse;
@@ -7,6 +9,7 @@ import com.javabuilder.productservice.dto.response.PageResponse;
 import com.javabuilder.productservice.dto.response.ProductDetailResponse;
 import com.javabuilder.productservice.entity.Category;
 import com.javabuilder.productservice.entity.Product;
+import com.javabuilder.productservice.entity.ProductImage;
 import com.javabuilder.productservice.exception.ErrorCode;
 import com.javabuilder.productservice.exception.ProductServiceException;
 import com.javabuilder.productservice.repository.CategoryRepository;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +41,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @PreAuthorize("hasAnyAuthority('SELLER','ADMIN')")
     @Override
@@ -57,6 +62,21 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.save(product);
         log.info("Product created successfully");
+
+        ProductCreatedEvent event = ProductCreatedEvent.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice().doubleValue())
+                .categoryId(category.getId())
+                .categoryName(category.getName())
+                .thumbnail(product.getImages().stream().filter(ProductImage::getIsPrimary).map(ProductImage::getUrl).findFirst().orElse(""))
+                .status(product.getStatus().name())
+                .inStock(product.getQuantity() > 0)
+                .createdAt(product.getCreatedAt())
+                .build();
+
+        kafkaTemplate.send("product-events", product.getId(), event);
 
         return CreateProductResponse.builder()
                 .id(product.getId())
@@ -147,6 +167,13 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         productRepository.delete(product);
+
+        ProductDeletedEvent event = ProductDeletedEvent.builder()
+                .id(product.getId())
+                .build();
+
+        kafkaTemplate.send("product-events", product.getId(), event);
+
         log.info("Product deleted successfully");
     }
 }
