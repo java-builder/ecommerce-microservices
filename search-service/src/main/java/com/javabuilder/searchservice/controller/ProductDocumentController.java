@@ -2,6 +2,7 @@ package com.javabuilder.searchservice.controller;
 
 import com.javabuilder.searchservice.document.ProductDocument;
 import com.javabuilder.searchservice.dto.request.SearchRequest;
+import com.javabuilder.searchservice.dto.response.AggregationResponse;
 import com.javabuilder.searchservice.dto.response.ApiResponse;
 import com.javabuilder.searchservice.dto.response.PageResponse;
 import com.javabuilder.searchservice.service.ProductDocumentService;
@@ -29,6 +30,16 @@ public class ProductDocumentController {
         return ApiResponse.<PageResponse<ProductDocument>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Products retrieved successfully")
+                .data(data)
+                .build();
+    }
+
+    @GetMapping("/products/aggregations")
+    ApiResponse<AggregationResponse> getAggregations(SearchRequest request) {
+        var data = productDocumentService.getAggregations(request);
+        return ApiResponse.<AggregationResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Aggregations retrieved successfully")
                 .data(data)
                 .build();
     }
