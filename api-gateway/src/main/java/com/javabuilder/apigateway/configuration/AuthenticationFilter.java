@@ -34,7 +34,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             new PublicEndpoint("/api/v1/users", HttpMethod.POST),
             new PublicEndpoint("/api/v1/auth/login", HttpMethod.POST),
             new PublicEndpoint("/api/v1/auth/refresh-token", HttpMethod.POST),
-            new PublicEndpoint("/api/v1/auth/introspect", HttpMethod.POST)
+            new PublicEndpoint("/api/v1/auth/introspect", HttpMethod.POST),
+            new PublicEndpoint("/api/v1/search/**", HttpMethod.GET)
     );
 
     private final JsonMapper jsonMapper;
