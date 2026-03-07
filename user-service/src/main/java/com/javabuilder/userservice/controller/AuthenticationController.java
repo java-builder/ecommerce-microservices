@@ -1,7 +1,9 @@
 package com.javabuilder.userservice.controller;
 
+import com.javabuilder.userservice.dto.request.IntrospectRequest;
 import com.javabuilder.userservice.dto.request.LoginRequest;
 import com.javabuilder.userservice.dto.response.ApiResponse;
+import com.javabuilder.userservice.dto.response.IntrospectResponse;
 import com.javabuilder.userservice.dto.response.LoginResponse;
 import com.javabuilder.userservice.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
@@ -65,6 +67,16 @@ public class AuthenticationController {
         return ApiResponse.<Void>builder()
                 .code(HttpStatus.OK.value())
                 .message("Logout successful")
+                .build();
+    }
+
+    @PostMapping("/introspect")
+    ApiResponse<IntrospectResponse> introspect(@RequestBody @Valid IntrospectRequest request) {
+        var data = authenticationService.introspectToken(request);
+        return ApiResponse.<IntrospectResponse>builder()
+                .code(HttpStatus.OK.value())
+                .message("Token introspected successfully")
+                .data(data)
                 .build();
     }
 

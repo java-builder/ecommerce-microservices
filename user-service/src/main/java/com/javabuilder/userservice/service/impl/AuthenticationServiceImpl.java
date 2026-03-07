@@ -1,7 +1,9 @@
 package com.javabuilder.userservice.service.impl;
 
 import com.javabuilder.userservice.dto.TokenDetails;
+import com.javabuilder.userservice.dto.request.IntrospectRequest;
 import com.javabuilder.userservice.dto.request.LoginRequest;
+import com.javabuilder.userservice.dto.response.IntrospectResponse;
 import com.javabuilder.userservice.dto.response.LoginResponse;
 import com.javabuilder.userservice.entity.RedisToken;
 import com.javabuilder.userservice.entity.User;
@@ -26,6 +28,8 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -145,5 +149,39 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             );
         }
     }
+
+    @Override
+    public IntrospectResponse introspectToken(IntrospectRequest request) {
+        try {
+            SignedJWT signedJWT = jwtService.validateToken(request.token());
+            String userId = signedJWT.getJWTClaimsSet().getSubject();
+            Set<String> roles = extractRoles(signedJWT.getJWTClaimsSet().getClaim("roles"));
+            return IntrospectResponse.builder()
+                    .active(true)
+                    .userId(userId)
+                    .roles(roles)
+                    .build();
+
+        } catch (ParseException | JOSEException e) {
+            return IntrospectResponse.builder()
+                    .active(false)
+                    .build();
+        }
+    }
+
+    private Set<String> extractRoles(Object rolesClaim) {
+        if (rolesClaim == null) {
+            return Collections.emptySet();
+        }
+
+        if (rolesClaim instanceof Collection<?> collection) {
+            return collection.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toSet());
+        }
+
+        return Collections.emptySet();
+    }
+
 
 }
