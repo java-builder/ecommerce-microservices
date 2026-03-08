@@ -5,11 +5,13 @@ import com.javabuilder.userservice.dto.TokenDetails;
 import com.javabuilder.userservice.exception.ErrorCode;
 import com.javabuilder.userservice.exception.UserServiceException;
 import com.javabuilder.userservice.service.JwtService;
+import com.javabuilder.userservice.service.RedisTokenService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +24,13 @@ import java.util.UUID;
 import static com.javabuilder.userservice.constant.JWTConstant.*;
 
 @Service
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret-key}")
     private String secretKey;
+
+    private final RedisTokenService redisTokenService;
 
     @Override
     public String generateAccessToken(String userId, Set<String> roles) {
@@ -100,13 +105,18 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public SignedJWT validateToken(String token) throws ParseException, JOSEException {
         SignedJWT signedJWT = SignedJWT.parse(token);
+        boolean verify = signedJWT.verify(new MACVerifier(secretKey));
+
+        if(!verify)
+            throw new UserServiceException(ErrorCode.TOKEN_INVALID);
+
         Date expiration = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         if(expiration.before(new Date()))
             throw new UserServiceException(ErrorCode.TOKEN_EXPIRED);
 
-        boolean verify = signedJWT.verify(new MACVerifier(secretKey));
-        if(!verify)
+        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
+        if(redisTokenService.existsByJwtId(jwtId))
             throw new UserServiceException(ErrorCode.TOKEN_INVALID);
 
         return signedJWT;
