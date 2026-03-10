@@ -11,6 +11,8 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +29,14 @@ public class S3StorageService implements StorageService {
 
     @Override
     public FileResponse uploadFile(MultipartFile file) throws IOException {
-        String key = file.getOriginalFilename() + "-" + System.currentTimeMillis();
+        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
+        String key = UUID.randomUUID() + "_" + originalFilename
+                .substring(originalFilename.lastIndexOf("."));
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(BUCKET_NAME)
                 .key(key)
+                .contentType(file.getContentType())
                 .build();
 
         RequestBody requestBody = RequestBody.fromInputStream(file.getInputStream(), file.getSize());
