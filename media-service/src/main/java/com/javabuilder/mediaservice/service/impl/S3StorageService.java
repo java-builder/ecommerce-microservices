@@ -89,9 +89,7 @@ public class S3StorageService implements StorageService {
     }
 
     private String generateKey(String originalFilename) {
-        String uuid = UUID.randomUUID().toString();
-
-        return originalFilename != null ? uuid + "_" + originalFilename.substring(0, originalFilename.lastIndexOf(".")) : uuid;
+        return UUID.randomUUID() + "-" + originalFilename;
     }
 
 }
