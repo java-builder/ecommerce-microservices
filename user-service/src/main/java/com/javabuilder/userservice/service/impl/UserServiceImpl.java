@@ -1,8 +1,10 @@
 package com.javabuilder.userservice.service.impl;
 
+import com.javabuilder.userservice.client.MediaClient;
 import com.javabuilder.userservice.common.RoleType;
 import com.javabuilder.userservice.dto.request.CreateUserRequest;
 import com.javabuilder.userservice.dto.response.CreateUserResponse;
+import com.javabuilder.userservice.dto.response.FileResponse;
 import com.javabuilder.userservice.dto.response.UserDetailResponse;
 import com.javabuilder.userservice.entity.Role;
 import com.javabuilder.userservice.entity.User;
@@ -18,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final RoleService roleService;
+    private final MediaClient mediaClient;
 
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
@@ -62,6 +66,23 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(userMapper::toUserDetailResponse)
                 .toList();
+    }
+
+    @Override
+    public String updateAvatar(String userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserServiceException(ErrorCode.USER_NOT_FOUND));
+
+        try {
+            FileResponse response = mediaClient.uploadFile(file).data();
+            String avatarUrl = response.url();
+            user.setAvatarUrl(avatarUrl);
+            userRepository.save(user);
+            return avatarUrl;
+        } catch (Exception e) {
+            log.error("Failed to upload file", e);
+            throw new UserServiceException(ErrorCode.MEDIA_UPLOAD_FAILED);
+        }
     }
 
 }

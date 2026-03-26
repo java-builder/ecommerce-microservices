@@ -20,6 +20,8 @@ public enum ErrorCode {
     UNAUTHORIZED(401, "Unauthorized", HttpStatus.UNAUTHORIZED),
     FORBIDDEN(403, "Forbidden", HttpStatus.FORBIDDEN),
 
+    MEDIA_UPLOAD_FAILED(500, "Failed to upload file to media service", HttpStatus.INTERNAL_SERVER_ERROR),
+
     ;
 
     private final int code;

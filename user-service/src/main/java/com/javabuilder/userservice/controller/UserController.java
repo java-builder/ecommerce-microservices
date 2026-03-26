@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,6 +49,17 @@ public class UserController {
         return ApiResponse.<List<UserDetailResponse>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Users retrieved successfully")
+                .data(data)
+                .build();
+    }
+
+    @PatchMapping("/avatar")
+    ApiResponse<String> updateAvatar(@AuthenticationPrincipal Jwt jwt, @RequestParam MultipartFile file) {
+        var userId = jwt.getSubject();
+        var data = userService.updateAvatar(userId, file);
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Avatar updated successfully")
                 .data(data)
                 .build();
     }

@@ -39,7 +39,7 @@ public class User implements UserDetails {
 
     private String phone;
 
-    private String avatarKey;
+    private String avatarUrl;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
