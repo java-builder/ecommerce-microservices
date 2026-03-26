@@ -30,7 +30,7 @@ public class HttpClientConfiguration {
     @Bean
     public MediaClient mediaClient() {
         RestClient restClient = builder()
-                .baseUrl("lb://MEDIA-SERVICE")
+                .baseUrl("http://MEDIA-SERVICE")
                 .requestInterceptor(httpClientInterceptor)
                 .build();
 
