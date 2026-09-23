@@ -57,9 +57,8 @@ export default function ProfilePage() {
 
     try {
       setUploading(true);
-      await updateAvatar(file);
-      await fetchMyInfo();
-      await refreshProfile();
+      const newAvatarUrl = await updateAvatar(file);
+      setProfile((prev) => (prev ? { ...prev, avatarUrl: newAvatarUrl } : null));
       showSuccess('Cập nhật Avatar thành công!');
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Không thể cập nhật avatar.';

@@ -15,7 +15,7 @@ public record UserDetailResponse(
         String firstName,
         String lastName,
         String phone,
-        String avatarKey,
+        String avatarUrl,
         Gender gender,
         LocalDate birthDate,
         UserStatus userStatus

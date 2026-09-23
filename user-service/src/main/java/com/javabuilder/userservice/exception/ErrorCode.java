@@ -22,6 +22,8 @@ public enum ErrorCode {
 
     MEDIA_UPLOAD_FAILED(500, "Failed to upload file to media service", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    CONTENT_TOO_LARGE(413, "Content too large", HttpStatus.CONTENT_TOO_LARGE)
+
     ;
 
     private final int code;
