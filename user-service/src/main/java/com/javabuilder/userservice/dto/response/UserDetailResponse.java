@@ -10,6 +10,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Builder
 @JsonInclude(NON_NULL)
 public record UserDetailResponse(
+        String id,
         String email,
         String firstName,
         String lastName,

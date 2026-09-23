@@ -3,12 +3,13 @@ services:
     image: postgres:17.8
     container_name: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_PASSWORD: 123456
       POSTGRES_DB: user_service
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     networks:
       - app_network
 
