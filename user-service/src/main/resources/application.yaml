@@ -8,11 +8,13 @@ spring:
     multipart:
       max-file-size: 8MB
       max-request-size: 10MB
+
   datasource:
     url: jdbc:postgresql://localhost:5433/user_service
     username: postgres
     password: 123456
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -22,6 +24,12 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 jwt:
   secret-key: O1oVhWC2yyN8DPgsAcRFel7I3EGE6O1kK3bzY8PgNXhXR1V4lU//KSrqSoa83EGCk6+o9DruNaZZWgy+yBGSww==

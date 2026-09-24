@@ -1,5 +1,6 @@
 package com.javabuilder.userservice.service.impl;
 
+import com.javabuilder.event.UserCreatedEvent;
 import com.javabuilder.userservice.client.MediaClient;
 import com.javabuilder.userservice.common.RoleType;
 import com.javabuilder.userservice.dto.request.CreateUserRequest;
@@ -17,6 +18,7 @@ import com.javabuilder.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleService roleService;
     private final MediaClient mediaClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
@@ -44,6 +47,9 @@ public class UserServiceImpl implements UserService {
         user.addRole(role);
         try {
             userRepository.save(user);
+
+            UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user.getEmail());
+            kafkaTemplate.send("user-created", user.getId(), userCreatedEvent);
         }catch (DataIntegrityViolationException exception) {
             log.error("User already exists");
             throw new UserServiceException(ErrorCode.USER_ALREADY_EXISTS);
