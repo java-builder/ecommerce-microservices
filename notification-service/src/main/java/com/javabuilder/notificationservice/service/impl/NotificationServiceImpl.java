@@ -1,6 +1,7 @@
 package com.javabuilder.notificationservice.service.impl;
 
 import com.javabuilder.notificationservice.common.NotificationStatus;
+import com.javabuilder.notificationservice.dto.request.MarkReadRequest;
 import com.javabuilder.notificationservice.dto.response.NotificationResponse;
 import com.javabuilder.notificationservice.dto.response.SliceResponse;
 import com.javabuilder.notificationservice.entity.Notification;
@@ -56,5 +57,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .isLast(notificationsSlice.isLast())
                 .content(content)
                 .build();
+    }
+
+    @Override
+    public Long markNotificationsAsRead(MarkReadRequest request) {
+        long modifiedCount = notificationRepository.markAsReadByIds(request.ids());
+        log.info("Marked {} notifications as read", modifiedCount);
+        return modifiedCount;
     }
 }
