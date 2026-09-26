@@ -28,6 +28,7 @@ public class SecurityConfiguration {
             "/api/v1/categories",
             "/api/v1/products",
             "/api/v1/products/{id}",
+            "/api/v1/categories"
     };
 
     private final CustomJwtDecoder jwtDecoder;
