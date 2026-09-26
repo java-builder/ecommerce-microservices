@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import AppBar from '@mui/material/AppBar';
@@ -22,12 +22,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import CategoryIcon from '@mui/icons-material/Category';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotification } from '@/hooks/useNotification';
-
-const NAV_ITEMS = [
-  { label: 'Trang chủ', path: '/' },
-  { label: 'Sản phẩm', path: '/products' },
-  { label: 'Quản trị', path: '/admin/products' },
-];
+import NotificationBell from './NotificationBell';
 
 export default function AppNavbar() {
   const pathname = usePathname();
@@ -35,6 +30,11 @@ export default function AppNavbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { showSuccess } = useNotification();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { label: 'Trang chủ', path: '/' },
@@ -69,7 +69,6 @@ export default function AppNavbar() {
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ minHeight: 64 }}>
-          {/* Logo & Brand */}
           <Box
             component={Link}
             href="/"
@@ -95,7 +94,6 @@ export default function AppNavbar() {
             </Typography>
           </Box>
 
-          {/* Navigation Items (Customer Shopping vs Admin Management) */}
           <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
             {navItems.map((item) => {
               const isActive =
@@ -132,10 +130,10 @@ export default function AppNavbar() {
             })}
           </Box>
 
-          {/* Auth & User Controls */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            {isAuthenticated && user ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minHeight: 40 }}>
+            {!mounted ? null : isAuthenticated && user ? (
               <>
+                <NotificationBell />
                 <Box
                   sx={{
                     display: { xs: 'none', sm: 'flex' },

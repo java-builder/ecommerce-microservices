@@ -5,3 +5,4 @@ export * from './category.types';
 export * from './product.types';
 export * from './search.types';
 export * from './media.types';
+export * from './notification.types';

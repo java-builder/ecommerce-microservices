@@ -1,4 +1,5 @@
 export { default as AppNavbar } from './common/AppNavbar';
+export { default as NotificationBell } from './common/NotificationBell';
 export { default as PageHeader } from './common/PageHeader';
 export { default as ConfirmDialog } from './common/ConfirmDialog';
 export { default as ProtectedRoute } from './auth/ProtectedRoute';

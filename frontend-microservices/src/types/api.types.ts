@@ -12,6 +12,15 @@ export interface PageResponse<T = any> {
   content: T[];
 }
 
+export interface SliceResponse<T = any> {
+  currentPage: number;
+  pageSize: number;
+  hasNext: boolean;
+  isLast?: boolean;
+  last?: boolean;
+  content: T[];
+}
+
 export interface ApiError {
   code: number;
   message: string;
