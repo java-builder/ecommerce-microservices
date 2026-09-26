@@ -5,6 +5,7 @@ import com.javabuilder.apigateway.dto.request.IntrospectRequest;
 import com.javabuilder.apigateway.dto.response.ErrorResponse;
 import com.javabuilder.apigateway.dto.PublicEndpoint;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -23,6 +24,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j(topic = "API-GATEWAY")
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -66,11 +68,14 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         return authenticationClient.introspect(IntrospectRequest.builder()
                 .token(token)
                 .build()).flatMap(introspect -> {
-                    if(introspect.data().active()) {
-                        return chain.filter(exchange);
-                    } else {
-                        return unauthenticated(exchange, "Invalid token");
-                    }
+            if(introspect.data().active()) {
+                return chain.filter(exchange);
+            } else {
+                return unauthenticated(exchange, "Invalid token");
+            }
+        }).onErrorResume(throwable -> {
+            log.error("Error while introspecting token", throwable);
+            return unauthenticated(exchange, "Invalid token");
         });
     }
 
