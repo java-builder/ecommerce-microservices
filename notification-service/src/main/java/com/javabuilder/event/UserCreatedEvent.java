@@ -8,5 +8,6 @@ import lombok.*;
 @Setter
 @Builder
 public class UserCreatedEvent {
+    private String userId;
     private String email;
 }

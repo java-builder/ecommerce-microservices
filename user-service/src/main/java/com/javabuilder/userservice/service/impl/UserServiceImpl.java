@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.save(user);
 
-            UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user.getEmail());
+            UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user.getId(), user.getEmail());
             kafkaTemplate.send("user-created", user.getId(), userCreatedEvent);
         }catch (DataIntegrityViolationException exception) {
             log.error("User already exists");
