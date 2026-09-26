@@ -18,4 +18,8 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     @Query("{ '_id': { $in: ?0 } }")
     @Update("{ '$set': { 'isRead': true } }")
     long markAsReadByIds(List<String> ids);
+
+    @Query("{ 'recipientId': ?0, 'isRead': false }")
+    @Update("{ '$set': { 'isRead': true } }")
+    long markAllAsReadByRecipientId(String recipientId);
 }

@@ -65,4 +65,11 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("Marked {} notifications as read", modifiedCount);
         return modifiedCount;
     }
+
+    @Override
+    public Long markAllAsRead(String userId) {
+        long modifiedCount = notificationRepository.markAllAsReadByRecipientId(userId);
+        log.info("Marked all ({}) notifications as read for user {}", modifiedCount, userId);
+        return modifiedCount;
+    }
 }

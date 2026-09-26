@@ -12,4 +12,6 @@ public interface NotificationService {
     SliceResponse<NotificationResponse> myNotification(String userId, int page, int size);
 
     Long markNotificationsAsRead(MarkReadRequest request);
+
+    Long markAllAsRead(String userId);
 }

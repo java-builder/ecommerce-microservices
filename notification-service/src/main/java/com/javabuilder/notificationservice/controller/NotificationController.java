@@ -40,4 +40,15 @@ public class NotificationController {
                 .data(data)
                 .build();
     }
+
+    @PutMapping("/mark-all-as-read")
+    ApiResponse<Long> markAllAsRead(@AuthenticationPrincipal Jwt jwt) {
+        var userId = jwt.getSubject();
+        var data = notificationService.markAllAsRead(userId);
+        return ApiResponse.<Long>builder()
+                .code(HttpStatus.OK.value())
+                .message("All notifications marked as read successfully")
+                .data(data)
+                .build();
+    }
 }

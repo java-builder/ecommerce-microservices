@@ -29,5 +29,7 @@ export const API_ENDPOINTS = {
   },
   NOTIFICATION: {
     BASE: '/api/v1/notifications',
+    MARK_AS_READ: '/api/v1/notifications/mark-as-read',
+    MARK_ALL_AS_READ: '/api/v1/notifications/mark-all-as-read',
   },
 };
