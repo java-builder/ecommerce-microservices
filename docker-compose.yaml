@@ -1,20 +1,19 @@
 services:
   postgres:
-    image: postgres:17.8
+    image: postgres:18.4
     container_name: postgres
     ports:
       - "5433:5432"
     environment:
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: user_service
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
     networks:
       - app_network
 
   redis:
-    image: redis:8.4.2
+    image: redis:8.6.4
     container_name: redis
     ports:
       - "6379:6379"
