@@ -31,6 +31,9 @@ public class Order {
     @Column(nullable = false)
     private String userId;
 
+    @Column(nullable = false, unique = true, length = 32)
+    private String orderCode;
+
     @Column(nullable = false)
     private BigDecimal subtotal;
 
