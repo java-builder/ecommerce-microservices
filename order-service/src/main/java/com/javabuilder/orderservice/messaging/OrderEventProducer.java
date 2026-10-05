@@ -17,7 +17,7 @@ public class OrderEventProducer {
 
     public void send(OrderCreatedEvent event) {
         kafkaTemplate.send(ORDER_CREATED_TOPIC, event.getOrderId(), event)
-                .whenComplete((result, ex) -> {
+                .whenComplete((_, ex) -> {
                     if (ex != null) {
                         log.error("Failed to send OrderCreatedEvent for orderId: {}", event.getOrderId(), ex);
                     } else {

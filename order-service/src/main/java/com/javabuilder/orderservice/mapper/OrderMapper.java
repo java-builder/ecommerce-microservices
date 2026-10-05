@@ -1,6 +1,5 @@
 package com.javabuilder.orderservice.mapper;
 
-import com.javabuilder.orderservice.client.dto.ProductStockValidationResponse;
 import com.javabuilder.orderservice.dto.request.ShippingAddressRequest;
 import com.javabuilder.orderservice.dto.response.CreateOrderResponse;
 import com.javabuilder.orderservice.dto.response.OrderDetailResponse;
