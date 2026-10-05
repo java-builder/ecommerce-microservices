@@ -71,4 +71,13 @@ public class Order {
 
     @LastModifiedDate
     private Instant updatedAt;
+
+    public void addOrderDetail(OrderDetail detail) {
+        if (this.orderDetails == null) {
+            this.orderDetails = new ArrayList<>();
+        }
+        this.orderDetails.add(detail);
+        detail.setOrder(this);
+    }
+
 }

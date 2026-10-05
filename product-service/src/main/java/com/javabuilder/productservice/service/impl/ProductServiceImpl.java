@@ -2,11 +2,14 @@ package com.javabuilder.productservice.service.impl;
 
 import com.javabuilder.event.ProductCreatedEvent;
 import com.javabuilder.event.ProductDeletedEvent;
+import com.javabuilder.productservice.common.ProductStatus;
+import com.javabuilder.productservice.dto.request.CheckProductStockRequest;
 import com.javabuilder.productservice.dto.request.CreateProductRequest;
 import com.javabuilder.productservice.dto.request.SearchRequest;
 import com.javabuilder.productservice.dto.response.CreateProductResponse;
 import com.javabuilder.productservice.dto.response.PageResponse;
 import com.javabuilder.productservice.dto.response.ProductDetailResponse;
+import com.javabuilder.productservice.dto.response.ProductStockValidationResponse;
 import com.javabuilder.productservice.entity.Category;
 import com.javabuilder.productservice.entity.Product;
 import com.javabuilder.productservice.entity.ProductImage;
@@ -29,8 +32,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -176,4 +179,48 @@ public class ProductServiceImpl implements ProductService {
 
         log.info("Product deleted successfully");
     }
+
+    @Override
+    public List<ProductStockValidationResponse> validateProductStock(CheckProductStockRequest request) {
+        List<String> productIds = request.items().stream()
+                .map(CheckProductStockRequest.ProductStockItem::productId)
+                .toList();
+
+        List<Product> products = productRepository.findAllById(productIds);
+
+        Map<String, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
+        return request.items().stream().map(item -> {
+            Product product = productMap.get(item.productId());
+            if (product == null) {
+                return ProductStockValidationResponse.builder()
+                        .productId(item.productId())
+                        .stockQuantity(0)
+                        .isAvailable(false)
+                        .build();
+            }
+
+            Boolean isAvailable = ProductStatus.ACTIVE == product.getStatus() && product.getQuantity() >= item.quantity();
+            String productThumbnail = extractThumbnail(product.getImages());
+
+            return ProductStockValidationResponse.builder()
+                    .productId(item.productId())
+                    .productName(product.getName())
+                    .productThumbnail(productThumbnail)
+                    .price(product.getPrice())
+                    .stockQuantity(product.getQuantity())
+                    .isAvailable(isAvailable)
+                    .build();
+        }).toList();
+    }
+
+    private String extractThumbnail(List<ProductImage> images) {
+        return images.stream()
+                .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+                .map(ProductImage::getUrl)
+                .findFirst()
+                .orElse(null);
+    }
+
 }

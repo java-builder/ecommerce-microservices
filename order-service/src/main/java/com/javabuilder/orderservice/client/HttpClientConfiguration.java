@@ -1,4 +1,4 @@
-package com.javabuilder.userservice.client;
+package com.javabuilder.orderservice.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -23,21 +23,20 @@ public class HttpClientConfiguration {
 
     @Bean
     @LoadBalanced
-    public RestClient.Builder builder() {
+    RestClient.Builder builder() {
         return RestClient.builder();
     }
 
     @Bean
-    public MediaClient mediaClient(RestClient.Builder builder) {
-        RestClient restClient = builder
-                .baseUrl("http://MEDIA-SERVICE")
+    ProductClient productClient() {
+        RestClient restClient = builder()
+                .baseUrl("http://PRODUCT-SERVICE")
                 .requestInterceptor(httpClientInterceptor)
                 .build();
 
-        HttpServiceProxyFactory factory = HttpServiceProxyFactory
+        HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory
                 .builderFor(RestClientAdapter.create(restClient))
                 .build();
-
-        return factory.createClient(MediaClient.class);
+        return proxyFactory.createClient(ProductClient.class);
     }
 }
