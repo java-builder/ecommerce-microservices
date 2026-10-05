@@ -1,5 +1,6 @@
 package com.javabuilder.orderservice.service.impl;
 
+import com.javabuilder.event.OrderCreatedEvent;
 import com.javabuilder.orderservice.client.ProductClient;
 import com.javabuilder.orderservice.client.dto.CheckProductStockRequest;
 import com.javabuilder.orderservice.client.dto.ProductStockValidationResponse;
@@ -14,6 +15,7 @@ import com.javabuilder.orderservice.entity.ShippingAddress;
 import com.javabuilder.orderservice.exception.ErrorCode;
 import com.javabuilder.orderservice.exception.OrderServiceException;
 import com.javabuilder.orderservice.mapper.OrderMapper;
+import com.javabuilder.orderservice.messaging.OrderEventProducer;
 import com.javabuilder.orderservice.repository.OrderRepository;
 import com.javabuilder.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
     private final OrderMapper orderMapper;
+    private final OrderEventProducer orderEventProducer;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -58,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
 
         List<ProductStockValidationResponse> productResponses = validateProductStock.data();
         productResponses.forEach(productResponse -> {
-            if(!productResponse.isAvailable()) {
+            if(Boolean.FALSE.equals(productResponse.isAvailable())) {
                 log.warn("Product out of stock: {}", productResponse.productId());
                 throw new OrderServiceException(ErrorCode.PRODUCT_OUT_OF_STOCK);
             }
@@ -106,6 +109,17 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.save(order);
         log.info("Order created successfully: {}", order.getId());
+
+        OrderCreatedEvent createdEvent = OrderCreatedEvent.builder()
+                .orderId(order.getId())
+                .items(orderDetails.stream()
+                        .map(detail -> OrderCreatedEvent.OrderItemEvent.builder()
+                                .productId(detail.getProductId())
+                                .quantity(detail.getQuantity())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+        orderEventProducer.send(createdEvent);
 
         return orderMapper.toCreateOrderResponse(order);
     }

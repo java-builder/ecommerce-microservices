@@ -18,6 +18,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(404, "Product not found", HttpStatus.NOT_FOUND),
     PRODUCT_ACCESS_DENIED(403, "You do not have permission to access this product", HttpStatus.FORBIDDEN),
 
+    PRODUCT_OUT_OF_STOCK(400, "Product is out of stock or insufficient quantity", HttpStatus.BAD_REQUEST),
     ;
 
     private final int code;
